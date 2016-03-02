@@ -1,0 +1,38 @@
+{
+  "name": "mundipagg-one",
+  "version": "1.0.0",
+  "description": "Mundipagg One NodeJS Library",
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mundipagg",
+    "gateway",
+    "payment",
+    "boleto",
+    "creditcard",
+    "bank"
+  ],
+  "author": "Willian Ribeiro Angelo <agfoccus@gmail.com>",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/brentertz/scapegoat/blob/master/LICENSE-MIT"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/brentertz/scapegoat/issues"
+  },
+  "devDependencies": {
+    "mocha": "~1.16.2",
+    "chai": "~1.8.1"
+  },
+  "dependencies": {
+    "dateformat": "^1.0.12"
+  }
+}
