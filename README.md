@@ -1,6 +1,6 @@
 # Mundipagg NodeJS PHP Library
 
-## Composer
+## NodeJS Project
 
     $ npm i -S mundipagg-one
 
