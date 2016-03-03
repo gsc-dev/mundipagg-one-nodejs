@@ -1,19 +1,15 @@
 'use strict';
-// namespace Gateway\One\DataContract\Request\CreateSaleRequestData;
 
-// use Gateway\One\DataContract\Common\BaseObject;
-// use Gateway\One\DataContract\Common\Address;
-// use Gateway\One\DataContract\Enum\BuyerCategoryEnum;
-// use Gateway\One\DataContract\Enum\EmailTypeEnum;
 const dateFormat = require('dateformat');
-const Address = require('./../../Common/Address');
+const Address    = require('./../../Common/Address');
+const fDate      = require('./../../Common/Date');
+const moment     = require('moment');
 
 /**
  * Class Buyer
  * @package Gateway\One\DataContract\Request\CreateSaleRequestData
  */
 module.exports = class Buyer {
-
 
     /**
      *
@@ -342,7 +338,8 @@ module.exports = class Buyer {
      * @return string
      */
     getBirthDate() {
-        return dateFormat(this.BirthDate, 'Y-m-d H:i:s');
+        // return dateFormat(this.BirthDate, 'Y-m-d H:i:s');
+        return this.BirthDate
     }
 
     /**
@@ -350,7 +347,9 @@ module.exports = class Buyer {
      * @return this
      */
     setBirthDate(birthDate) {
-        this.BirthDate = dateFormat(birthDate, 'Y-m-d H:i:s');
+        this.BirthDate =  fDate.stringToDate(birthDate, 'dd/MM/yyyy','/');
+        this.BirthDate = moment(this.BirthDate).format('Y-M-D h:mm:ss').toString();
+        return this;
     }
 
     /**
@@ -366,12 +365,10 @@ module.exports = class Buyer {
      */
     addAddress(address) {
         if (address == null) {
-            address = new Address();
+            this.AddressCollection = new Address();
         }
 
-        this.AddressCollection = address;
-
-        return address;
+        return this.AddressCollection;
     }
 
     /**
@@ -387,7 +384,6 @@ module.exports = class Buyer {
      */
     setFacebookId(facebookId) {
         this.FacebookId = facebookId;
-
         return this;
     }
 
@@ -412,8 +408,7 @@ module.exports = class Buyer {
      * @return string
      */
     getCreateDateInMerchant() {
-        // return\ DateTime::createFromFormat('Y-m-d\TH:i:s', this.CreateDateInMerchant);
-        return Date().now;
+        return Date('Y-m-d\TH:i:s', this.CreateDateInMerchant);
     }
 
     /**
@@ -421,7 +416,7 @@ module.exports = class Buyer {
      * @return this
      */
     setCreateDateInMerchant(createDateInMerchant) {
-        // this.CreateDateInMerchant = createDateInMerchant.format('Y-m-d\TH:i:s');
+        this.CreateDateInMerchant = dateFormat(createDateInMerchant, 'Y-m-d\TH:i:s');
 
         return this;
     }

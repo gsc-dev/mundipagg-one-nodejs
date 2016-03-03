@@ -1,49 +1,50 @@
 'use strict';
+
 module.exports = class BaseObject {
-  getData(properties) {
-    properties = this.get_object_vars(properties);
 
-    // _.forEach(properties, function  (propertieName, propertie) {
-    // if (typeof  propertie === 'array') {
-    //     foreach (propertie as &collectionItem) {
-    //         if (collectionItem instanceof BaseObject) {
-    //             collectionItem = collectionItem->getData();
-    //         }
-    //     }
-    // }
-    // elseif(propertie instanceof BaseObject)
-    // {
-    //     propertie = propertie.getData();
-    // }
-    //
-    // if (propertie == null) {
-    //     unset(properties[propertieName]);
-    // }
-    // })
-    return properties;
-  }
+    getData(properties) {
+        properties = this.get_object_vars(properties);
 
-  get_object_vars(obj) {
-    // http://kevin.vanzonneveld.net
-    // +   original by: Brett Zamir (http://brett-zamir.me)
-    // *     example 1: function Myclass () {this.privMethod = function (){}}
-    // *     example 1: Myclass.classMethod = function () {}
-    // *     example 1: Myclass.prototype.myfunc1 = function () {return(true);};
-    // *     example 1: Myclass.prototype.myfunc2 = function () {return(true);}
-    // *     example 1: get_object_vars('MyClass')
-    // *     returns 1: {}
-    var retArr = {}, prop = '';
-    for (prop in obj) {
-      if (typeof obj[prop] !== 'function' && prop !== 'prototype') {
-        retArr[prop] = obj[prop];
-      }
+        properties.forEach(function (propertieName, propertie) {
+            if (typeof  propertie === 'array') {
+                propertie.foreach(function (collectionItem) {
+                    if (collectionItem instanceof BaseObject) {
+                        collectionItem = collectionItem.getData();
+                    }
+                });
+            }
+
+            else if (propertie instanceof BaseObject) {
+                propertie = propertie.getData();
+            }
+
+            if (propertie == null) {
+                unset(properties[propertieName]);
+            }
+        })
+        return properties;
     }
-    for (prop in obj.prototype) {
-      if (typeof obj.prototype[prop] !== 'function') {
-        retArr[prop] = obj.prototype[prop];
-      }
+
+    get_object_vars(obj) {
+        // http://kevin.vanzonneveld.net
+        // +   original by: Brett Zamir (http://brett-zamir.me)
+        // *     example 1: function Myclass () {this.privMethod = function (){}}
+        // *     example 1: Myclass.classMethod = function () {}
+        // *     example 1: Myclass.prototype.myfunc1 = function () {return(true);};
+        // *     example 1: Myclass.prototype.myfunc2 = function () {return(true);}
+        // *     example 1: get_object_vars('MyClass')
+        // *     returns 1: {}
+        var retArr = {}, prop = '';
+        for (prop in obj) {
+            if (typeof obj[prop] !== 'function' && prop !== 'prototype') {
+                retArr[prop] = obj[prop];
+            }
+        }
+        for (prop in obj.prototype) {
+            if (typeof obj.prototype[prop] !== 'function') {
+                retArr[prop] = obj.prototype[prop];
+            }
+        }
+        return retArr;
     }
-    return retArr;
-  }
-}
-//# sourceMappingURL=BaseObject.js.map
+};

@@ -1,10 +1,10 @@
 'use strict';
 
 const ApiClient               = require('./ApiClient');
-const CreditCard              = require('./One/DataContract/Request/CreateSaleRequestData/CreditCard');
+// const CreditCard              = require('./One/DataContract/Request/CreateSaleRequestData/CreditCard');
 const CreditCardTransaction   = require('./One/DataContract/Request/CreateSaleRequestData/CreditCardTransaction');
 const CreditCardBrandEnum     = require('./One/DataContract/Enum/CreditCardBrandEnum');
-const Order                   = require('./One/DataContract/Request/CreateSaleRequestData/Order');
+// const Order                   = require('./One/DataContract/Request/CreateSaleRequestData/Order');
 const CreateSaleRequest       = require('./One/DataContract/Request/CreateSaleRequest');
 const CreditCardOperationEnum = require('./One/DataContract/Enum/CreditCardOperationEnum');
 const AddressTypeEnum         = require('./One/DataContract/Enum/AddressTypeEnum');
@@ -22,10 +22,7 @@ const EcommerceCategoryEnum   = require('./One/DataContract/Enum/EcommerceCatego
 let request = new CreateSaleRequest();
 let uuid    = 1231231323123;
 
-let api     = new ApiClient({
-    baseUrl: 'https://sandbox.mundipaggone.com',
-    merchantKey: '85328786-8BA6-420F-9948-5352F5A183EB'
-});
+let api = new ApiClient();
 
 
 // Dados da transação de cartão de crédito
@@ -67,6 +64,7 @@ creditCardTransaction
     .setSoftDescriptorText('TESTE');
 
 // Dados do comprador
+
 request
     .getBuyer()
     .setName('Comprador Mundi')
@@ -81,7 +79,7 @@ request
     .setHomePhone('3003-0460')
     .setMobilePhone('99999-8888')
     .setWorkPhone('99999-7777')
-    .setBirthDate(Date('d/m/Y', '11/05/1990'))
+    .setBirthDate('11/05/1990')
     .setFacebookId('1234567890')
     .setTwitterId('1234567890')
     .setCreateDateInMerchant(new Date())
@@ -163,4 +161,4 @@ shoppingCart
 // Faz a chamada para criação
 // let response = client.createSale(request);
 let response = api.createSale(request);
-console.log(response);
+console.log('api response', response);

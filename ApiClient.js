@@ -1,8 +1,11 @@
 'use strict';
-const http            = require('http');
+const https           = require('https');
+const BaseObject      = require('./One/DataContract/Common/BaseObject');
 const ApiResourceEnum = require('./One/DataContract/Enum/ApiResourceEnum');
 const ApiMethodEnum   = require('./One/DataContract/Enum/ApiMethodEnum');
 const env             = require('./env.json');
+const fs              = require('fs');
+const _               = require('lodash');
 /**
  * Class ApiClient
  * @package gateway
@@ -28,8 +31,12 @@ module.exports = class ApiClient {
         /**
          * @var boolean
          */
-        this.isSslCertsVerificationEnabled = value.isSslCertsVerificationEnabled || env.isSslCertsVerificationEnabled ||true;
+        this.isSslCertsVerificationEnabled = value.isSslCertsVerificationEnabled || env.isSslCertsVerificationEnabled || true;
 
+    }
+
+    getData() {
+        return this;
     }
 
     /**
@@ -63,7 +70,7 @@ module.exports = class ApiClient {
     /**
      * @return boolean
      */
-    isSslCertsVerificationEnabled() {
+    getisSslCertsVerificationEnabled() {
         return this.isSslCertsVerificationEnabled;
     }
 
@@ -88,9 +95,11 @@ module.exports = class ApiClient {
      * @return string
      */
     buildUrl(uri) {
-        // var url = sprintf("%s/%s", this.getBaseUrl(), uri);
+        // var url = this.getBaseUrl().replace("%s/%s", uri);
+        // let url = this.getBaseUrl() + '/' + uri;
+        let url = '/' + uri.replace('/', '');
 
-        return uri;
+        return url;
     }
 
 
@@ -102,35 +111,56 @@ module.exports = class ApiClient {
      * @return array
      */
     getOptions(uri, method, bodyData, queryStringData) {
+        // let options = {
+        //     CURLOPT_FOLLOWLOCATION: true,
+        //     CURLOPT_MAXREDIRS: 10,
+        //     CURLOPT_HTTPHEADER: {
+        //         'MerchantKey': this.getMerchantKey(),
+        //         'Content-type': 'application/json',
+        //         'Accept': 'application/json'
+        //     },
+        //     CURLOPT_URL: this.buildUrl(uri),
+        //     CURLOPT_RETURNTRANSFER: true,
+        //     CURLOPT_TIMEOUT: 10,
+        //     CURLOPT_CUSTOMREQUEST: method,
+        //     CURLOPT_SSL_VERIFYPEER: this.isSslCertsVerificationEnabled
+        // };
+
         let options = {
-            CURLOPT_FOLLOWLOCATION: true,
-            CURLOPT_MAXREDIRS: 10,
-            CURLOPT_HTTPHEADER: 'MerchantKey: ' + this.getMerchantKey(),
-            CURLOPT_URL: this.buildUrl(uri),
-            CURLOPT_RETURNTRANSFER: true,
-            CURLOPT_TIMEOUT: 10,
-            CURLOPT_CUSTOMREQUEST: method,
-            CURLOPT_SSL_VERIFYPEER: this.isSslCertsVerificationEnabled()
+            host: this.baseUrl,
+            path: this.buildUrl(uri),
+            timeout: 10,
+            method: method,
+            headers: {
+                'MerchantKey': this.getMerchantKey(),
+                'Content-type': 'application/json',
+                'Accept': 'application/json'
+            }
         };
 
         // Se for passado parametro na query string, vamos concatenar eles na url
-        // if (queryStringData != null) {
-        //   options[CURLOPT_URL] .= '?' . http_build_query(queryStringData);
-        // }
+        if (queryStringData != null) {
+            options.path = '?' + queryStringData;
+        }
 
         // if (strstr(uri, 'TransactionReportFile') == false) {
-        //   array_push(options[CURLOPT_HTTPHEADER], 'Content-type: application/json', 'Accept: application/json');
+        //     options.CURLOPT_HTTPHEADER.push({'Content-type': 'application/json'});
+        //     options.CURLOPT_HTTPHEADER.push({'Accept': 'application/json'});
         // }
 
         // Associa o certificado para a verificação
-        // if (this.isSslCertsVerificationEnabled()) {
-        //   options[CURLOPT_CAINFO] = dirname(__FILE__) . '/../data/ca-certificates.crt';
-        // }
+        if (this.isSslCertsVerificationEnabled) {
+            options.cert = fs.readFileSync('./data/ca-certificates.crt');
+        }
 
         // Se o método http for post ou put e tiver dados para enviar no body
-        // if (in_array(method, array(One\DataContract\Enum\ApiMethodEnum.POST, One\DataContract\Enum\ApiMethodEnum.PUT, One\DataContract\Enum\ApiMethodEnum.PATCH)) && bodyData != null) {
-        // options[CURLOPT_POSTFIELDS] = json_encode(bodyData);
-        // }
+        if (_.some(method, [
+                ApiMethodEnum.POST,
+                ApiMethodEnum.PUT,
+                ApiMethodEnum.PATCH
+            ]) && bodyData != null) {
+            options.form = bodyData;
+        }
         return options;
     }
 
@@ -149,6 +179,27 @@ module.exports = class ApiClient {
         // Define as opções da sessão
         // curl_setopt_array(curlSession, this.getOptions(resource, method, bodyData, queryString));
         let options = this.getOptions(resource, method, bodyData, queryString);
+
+        // console.log(options);
+
+
+        var req = https.request(options, function (res) {
+            console.log('STATUS: ' + res.statusCode);
+            console.log('HEADERS: ' + JSON.stringify(res.headers));
+            res.setEncoding('utf8');
+            res.on('data', function (chunk) {
+                console.log('BODY: ' + chunk);
+            });
+        });
+
+        req.on('error', function (e) {
+            console.log('problem with request: ' + e.message);
+        });
+
+// write data to request body
+        req.write('data\n');
+        req.write('data\n');
+        req.end();
 
         // Dispara a requisição cURL
         // responseBody = curl_exec(curlSession);
@@ -176,7 +227,7 @@ module.exports = class ApiClient {
         // }
         // Retorna a resposta
         // return response;
-        return options;
+        return req;
     }
 
 
@@ -187,7 +238,7 @@ module.exports = class ApiClient {
      */
     createSale(createSaleRequest) {
         // Dispara a requisição
-        // let createSaleResponse = this.sendRequest(ApiResourceEnum.SALE, ApiMethodEnum.POST, createSaleRequest.getData());
+        let createSaleResponse = this.sendRequest(ApiResourceEnum.SALE, ApiMethodEnum.POST, createSaleRequest);
 
         // let isSuccess = false;
 
@@ -207,7 +258,7 @@ module.exports = class ApiClient {
         // }
 
         // return isSuccess;
-        return createSaleRequest;
+        return createSaleResponse;
     }
 
 };
